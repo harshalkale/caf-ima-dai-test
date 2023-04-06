@@ -1,6 +1,10 @@
 'use strict';
 
 const NAMESPACE = 'urn:x-cast:com.google.ads.ima.cast';
+const LOG_RECEIVER_TAG = 'Receiver';
+const DEBUG_MODE = true;
+
+let castDebugLogger;
 
 class Player {
     /**
@@ -66,6 +70,7 @@ class Player {
 
     /** Initializes CAF and IMA SDK */
     initialize() {
+        this.attachDebugger_();
         // Map of namespace names to their types.
         const options = new cast.framework.CastReceiverOptions();
         options.customNamespaces = {};
@@ -109,6 +114,38 @@ class Player {
         }
     }
 
+    attachDebugger_() {
+        if (DEBUG_MODE) {
+            castDebugLogger = cast.debug.CastDebugLogger.getInstance();
+            this.castContext_.addEventListener(cast.framework.system.EventType.READY, () => {
+                if (!castDebugLogger.debugOverlayElement_) {
+                    /**
+                     *  Enable debug logger and show a 'DEBUG MODE' tag at
+                     *  top left corner.
+                     */
+                    castDebugLogger.setEnabled(true);
+
+                    /**
+                     * Show debug overlay.
+                     */
+                    // castDebugLogger.showDebugLogs(true);
+                }
+            });
+            castDebugLogger.loggerLevelByEvents = {
+                'cast.framework.events.category.CORE':
+                    cast.framework.LoggerLevel.INFO,
+                'cast.framework.events.EventType.MEDIA_STATUS':
+                    cast.framework.LoggerLevel.DEBUG
+            };
+
+            if (!castDebugLogger.loggerLevelByTags) {
+                castDebugLogger.loggerLevelByTags = {};
+            }
+
+            castDebugLogger.loggerLevelByTags[LOG_RECEIVER_TAG] = cast.framework.LoggerLevel.DEBUG;
+        }
+    }
+
     /**
      * Attaches message interceptors and event listeners to connect IMA to CAF.
      * @private
@@ -131,6 +168,9 @@ class Player {
         };
         this.playerManager_.setMessageInterceptor(
             cast.framework.messages.MessageType.LOAD, (request) => {
+                castDebugLogger.debug(LOG_RECEIVER_TAG,
+                    `loadRequestData: ${JSON.stringify(request)}`);
+
                 return this.streamManager_
                     .requestStream(request, getStreamRequest(request))
                     .then((request) => {
