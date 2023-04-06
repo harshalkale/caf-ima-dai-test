@@ -1,0 +1,1 @@
+npx concurrently -n serve,ngrok "npx serve www" --raw "./ngrok http 3000"

@@ -1,0 +1,25 @@
+body {
+    font-family: 'Proxima Nova', 'Helvetica Neue', Arial, sans-serif;
+    margin: 0 auto;
+}
+
+/* ------------------------------------------------- */
+/* Overlay Text                               */
+/* ------------------------------------------------- */
+cast-media-player:after {
+    content: " ";
+    position: absolute;
+    inset: 0;
+    text-align: center;
+    font-size: 10px;
+    color: #feee00;
+}
+
+#debug {
+    position: absolute;
+    inset: 0;
+    padding: 70px 50px 0;
+    color: black;
+    background: #feee00cc;
+    z-index: 1000;
+}
